@@ -9,7 +9,13 @@ export default ({ config, db }) => {
   
   // expose the breakfast endpoint
   api.post('/thebrain', (req, res) => {
-    const payload = req.body.event;
+    const { body } = req;
+
+    if(body.challenge){`//needed for slack verification`
+      return res.sendStatus(200).send(body.challenge);
+    }
+
+    const payload = body.event;
     res.sendStatus(200);
 
     // response for being mentioned in a channel
