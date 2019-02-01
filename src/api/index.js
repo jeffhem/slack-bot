@@ -19,7 +19,7 @@ export default ({ config, db }) => {
     res.sendStatus(200);
 
     // response for being mentioned in a channel
-    if (payload.type === 'app_mention' || payload.channel_type === 'im') {
+    if (payload.type === 'app_mention' || (payload.channel_type === 'im' && payload.user !== 'WFDG0SVPB')) {
       if (payload.text.includes('breakfast')) {
         getDb(db, 'breakfast').then(data => {
           let currentData = data;
