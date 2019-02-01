@@ -1,12 +1,14 @@
 import { Router } from 'express';
+import request from 'request';
 import * as util from '../lib/util';
+import * as watson from '../lib/watson';
 import { getDb, updateDb } from '../db';
 
 export default ({ config, db }) => {
   let api = Router();
-
+  
   // expose the breakfast endpoint
-  api.post('/breakfast_duty', (req, res) => {
+  api.post('/thebrain', (req, res) => {
     const payload = req.body.event;
     res.sendStatus(200);
 
@@ -25,31 +27,32 @@ export default ({ config, db }) => {
           }
           const date = new Date(currentData.lastDate).toDateString();
           const response = `it's ${currentData.team[data.lastIndex]}'s turn on ${date}`;
+          console.log(response);
           util.postMessage(response, payload.channel);
         })
       }else if (payload.text.includes('lunch')) {
         getDb(db, 'lunch').then(data => {
           util.postMessage(util.randomMsg(data.res), payload.channel);
         })
-      }else if ((payload.channel_type === 'im' && payload.text.trim() === '<@WFDG0SVPB>')
-        || payload.type === 'app_mention') {
-        getDb(db, 'greetings').then(data => {
-          const response = `${util.randomMsg(data.res)}, <@${payload.user}>!`
-          util.postMessage(response, payload.channel);
-        })
+      } else {
+        const { text } = payload;
+        watson.message(text).then(resp => {
+          console.log("watson response:", resp);
+          util.postMessage(resp, payload.channel);
+        });
       }
     }
 
     // response to someone joined a channel
-    if (payload.event.type === 'member_joined_channel') {
-      const response = `<@${payload.event.user}> welcome!`;
-      util.postMessage(response, payload.event.channel);
+    if (payload.type === 'member_joined_channel') {
+      const response = `<@${payload.user}> welcome!`;
+      util.postMessage(response, payload.channel);
     }
 
     // response to someone left a channel
-    if (payload.event.type === 'member_left_channel') {
-      const response = `See you later, <@${payload.event.user}>!`;
-      util.postMessage(response, payload.event.channel);
+    if (payload.type === 'member_left_channel') {
+      const response = `See you later, <@${payload.user}>!`;
+      util.postMessage(response, payload.channel);
     }
   });
 
