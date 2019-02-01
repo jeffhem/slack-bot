@@ -12,7 +12,7 @@ export default ({ config, db }) => {
     const { body } = req;
 
     if(body.challenge){`//needed for slack verification`
-      return res.sendStatus(200).send(body.challenge);
+      return res.status(200).send(body.challenge);
     }
 
     const payload = body.event;
