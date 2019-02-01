@@ -42,7 +42,7 @@ const sendMessage = (sessionId, text) => {
       const { output } = parsedResponse;
       const { generic } = output;
       if(generic && generic.length > 0){
-        textResponse = generic[0].text;
+        textResponse = generic.map(response => `${response.text}\n`).join("");
       }else{
         textResponse = "I did not get that. Could you try rephrasing?";
       }
